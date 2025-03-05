@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  # Any other services here
+
+  api:
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+        - PORT=3000
+    ports:
+      - 3000
+    volumes:
+      - .:/home/node/app
+    environment:
+      - NODE_ENV=development
+    restart: always
+    command: npm run start:dev
