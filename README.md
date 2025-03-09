@@ -16,7 +16,7 @@ Additionally, we need to introduce a destruction flag on the planet entity, whic
 
 Your task is to modify our SWAPI wrapper by implementing a species endpoint that includes associated planet data in a single API response, reducing the need for separate API calls. Additionally, you will introduce a destruction flag (`destroyed: true/false`) on planets, which must be persisted in a database and always included in the planet entity's response.
 
-You will be working with a boilerplate that **does not yet contain any existing endpoints**, so you will need to define and implement the necessary API routes. While CI/CD setup or deployment configurations are out of scope, you can assume the API will run in a Kubernetes cluster. 
+You will be working with a boilerplate that **does not yet contain any existing endpoints**, so you will need to define and implement the necessary API routes. While CI/CD setup or deployment configurations are out of scope, you can assume the API will run in a Kubernetes cluster.
 
 ## Requirements
 
