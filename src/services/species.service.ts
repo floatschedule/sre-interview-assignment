@@ -1,5 +1,5 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
-import { Species, Planet } from '../types/entities.types';
+import { Species, PaginatedResponse } from '../types/entities.types';
 import { mapToPlanet } from './mappers/mapToPlanet';
 import { mapToSpecies } from './mappers/mapToSpecies';
 export class SpeciesService {
@@ -21,6 +21,31 @@ export class SpeciesService {
     const planetData = mapToPlanet(planetSwapiData);
 
     return mapToSpecies(speciesData, planetData);
+  }
+
+  async getSpeciesPage(page: number = 1): Promise<PaginatedResponse<Species>> {
+    const response = await this.swapiAdapter.getSpeciesPage(page);
+
+    const enhancedSpecies = await Promise.all(
+      response.results.map(async (speciesData) => {
+        if (!speciesData.homeworld) {
+          return mapToSpecies(speciesData, null);
+        }
+
+        const planetId = this.extractIdFromUrl(speciesData.homeworld);
+        const planetData = await this.swapiAdapter.getPlanet(planetId);
+        const planet = mapToPlanet(planetData);
+
+        return mapToSpecies(speciesData, planet);
+      })
+    );
+
+    return {
+      count: response.count,
+      next: response.next,
+      previous: response.previous,
+      results: enhancedSpecies
+    };
   }
   private extractIdFromUrl(url: string): string {
     // Remove trailing slash if present
