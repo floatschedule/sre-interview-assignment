@@ -1,6 +1,6 @@
 // src/adapters/swapi.adapter.test.ts
 import { SwapiAdapter } from './swapi.adapter';
-import { SwapiSpecies, SwapiPlanet } from '../types/swapi.types';
+import { SwapiSpecies, SwapiPlanet, SwapiPaginatedResponse } from '../types/swapi.types';
 
 // Mock global fetch
 global.fetch = jest.fn();
@@ -75,6 +75,117 @@ describe('SwapiAdapter', () => {
       (global.fetch as jest.Mock).mockRejectedValue(networkError);
 
       const resultPromise = swapiAdapter.getSpecies('1');
+
+      await expect(resultPromise).rejects.toThrow(/^Failed to fetch$/);
+    });
+  });
+
+  describe('getSpeciesPage', () => {
+    test('should fetch species page data successfully', async () => {
+      const mockSpecies1: SwapiSpecies = {
+        name: 'Human',
+        classification: 'mammal',
+        designation: 'sentient',
+        average_height: '180',
+        skin_colors: 'caucasian, black, asian, hispanic',
+        hair_colors: 'blonde, brown, black, red',
+        eye_colors: 'brown, blue, green, hazel, grey, amber',
+        average_lifespan: '120',
+        homeworld: 'https://swapi.dev/api/planets/9/',
+        language: 'Galactic Basic',
+        people: ['https://swapi.dev/api/people/1/'],
+        films: ['https://swapi.dev/api/films/1/'],
+        created: '2014-12-10T13:52:11.567000Z',
+        edited: '2014-12-20T21:36:42.136000Z',
+        url: 'https://swapi.dev/api/species/1/'
+      };
+
+      const mockSpecies2: SwapiSpecies = {
+        name: 'Droid',
+        classification: 'artificial',
+        designation: 'sentient',
+        average_height: 'n/a',
+        skin_colors: 'n/a',
+        hair_colors: 'n/a',
+        eye_colors: 'n/a',
+        average_lifespan: 'indefinite',
+        homeworld: null,
+        language: 'n/a',
+        people: ['https://swapi.dev/api/people/2/'],
+        films: ['https://swapi.dev/api/films/1/'],
+        created: '2014-12-10T15:16:16.259000Z',
+        edited: '2014-12-20T21:36:42.139000Z',
+        url: 'https://swapi.dev/api/species/2/'
+      };
+
+      const mockResponse: SwapiPaginatedResponse<SwapiSpecies> = {
+        count: 2,
+        next: null,
+        previous: null,
+        results: [mockSpecies1, mockSpecies2]
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockResponse)
+      });
+
+      const result = await swapiAdapter.getSpeciesPage();
+
+      expect(result).toEqual(mockResponse);
+      expect(global.fetch).toHaveBeenCalledWith('https://swapi.dev/api/species/?page=1');
+    });
+
+    test('should fetch specific page of species data', async () => {
+      const mockResponse: SwapiPaginatedResponse<SwapiSpecies> = {
+        count: 37,
+        next: 'https://swapi.dev/api/species/?page=3',
+        previous: 'https://swapi.dev/api/species/?page=1',
+        results: []
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockResponse)
+      });
+
+      const result = await swapiAdapter.getSpeciesPage(2);
+
+      expect(result).toEqual(mockResponse);
+      expect(global.fetch).toHaveBeenCalledWith('https://swapi.dev/api/species/?page=2');
+    });
+
+    test('should throw error when page does not exist', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found'
+      });
+
+      const resultPromise = swapiAdapter.getSpeciesPage(55);
+
+      await expect(resultPromise).rejects.toThrow(/^Species page 55 not found$/);
+      expect(global.fetch).toHaveBeenCalledWith('https://swapi.dev/api/species/?page=55');
+    });
+
+    test('should throw error for server errors', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error'
+      });
+
+      const resultPromise = swapiAdapter.getSpeciesPage();
+
+      await expect(resultPromise).rejects.toThrow(/^Error fetching species page: Internal Server Error$/);
+      expect(global.fetch).toHaveBeenCalledWith('https://swapi.dev/api/species/?page=1');
+    });
+
+    test('should throw error when network fails', async () => {
+      const networkError = new Error('Failed to fetch');
+      (global.fetch as jest.Mock).mockRejectedValue(networkError);
+
+      const resultPromise = swapiAdapter.getSpeciesPage();
 
       await expect(resultPromise).rejects.toThrow(/^Failed to fetch$/);
     });

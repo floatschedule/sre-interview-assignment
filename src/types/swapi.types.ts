@@ -32,3 +32,10 @@ export interface SwapiPlanet {
   edited: string;
   url: string;
 }
+
+export interface SwapiPaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}

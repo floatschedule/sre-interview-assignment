@@ -1,4 +1,4 @@
-import { SwapiSpecies, SwapiPlanet } from '../types/swapi.types';
+import { SwapiSpecies, SwapiPlanet, SwapiPaginatedResponse } from '../types/swapi.types';
 
 export class SwapiAdapter {
   private baseUrl: string;
@@ -18,6 +18,19 @@ export class SwapiAdapter {
     }
 
     return await response.json() as SwapiSpecies;
+  }
+
+  async getSpeciesPage(page: number = 1): Promise<SwapiPaginatedResponse<SwapiSpecies>> {
+    const response = await fetch(`${this.baseUrl}/species/?page=${page}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Species page ${page} not found`);
+      }
+      throw new Error(`Error fetching species page: ${response.statusText}`);
+    }
+
+    return await response.json() as SwapiPaginatedResponse<SwapiSpecies>;
   }
 
   async getPlanet(id: string): Promise<SwapiPlanet> {
