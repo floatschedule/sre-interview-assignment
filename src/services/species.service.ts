@@ -1,5 +1,5 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
-import { Species, Planet, PaginatedResponse } from '../types/entities.types';
+import { Species, PaginatedResponse } from '../types/entities.types';
 import { mapToPlanet } from './mappers/mapToPlanet';
 import { mapToSpecies } from './mappers/mapToSpecies';
 
@@ -49,7 +49,7 @@ export class SpeciesService {
     };
   }
 
-   async getAllSpecies(): Promise<Species[]> {
+  async getAllSpecies(sort?: string, order: 'asc' | 'desc' = 'asc'): Promise<Species[]> {
     const allSpeciesData = await this.swapiAdapter.getAllSpecies();
 
     const enhancedSpecies = await Promise.all(
@@ -66,9 +66,31 @@ export class SpeciesService {
       })
     );
 
+    if (sort === 'average_height') {
+      return this.sortSpeciesByAverageHeight(enhancedSpecies, order);
+    }
+
     return enhancedSpecies;
   }
 
+  sortSpeciesByAverageHeight(species: Species[], order: 'asc' | 'desc'): Species[] {
+    return [...species].sort((a, b) => {
+      const heightA = this.parseHeight(a.average_height);
+      const heightB = this.parseHeight(b.average_height);
+
+      // Always place nulls at the end regardless of sort order
+      if (heightA === null) return 1;
+      if (heightB === null) return -1;
+
+      return order === 'asc' ? heightA - heightB : heightB - heightA;
+    });
+  }
+
+  // Parse the height as a number, return null if it's not a number (like "undefined")
+  private parseHeight(height: string): number | null {
+    const parsed = parseFloat(height);
+    return isNaN(parsed) ? null : parsed;
+  }
 
   private extractIdFromUrl(url: string): string {
     // Remove trailing slash if present

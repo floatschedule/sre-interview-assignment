@@ -267,53 +267,19 @@ describe('SpeciesService', () => {
   });
 
   describe('getAllSpecies', () => {
-    it('should return all species', async () => {
+    it('should return all species with homeworld data', async () => {
       const mockSpeciesData = [
         {
           name: 'Human',
           classification: 'mammal',
           designation: 'sentient',
           average_height: '180',
-          homeworld: null,
-          language: 'Galactic Basic',
-          skin_colors: '',
-          hair_colors: '',
-          eye_colors: '',
-          average_lifespan: '',
-          people: [],
-          films: [],
-          created: '',
-          edited: '',
-          url: ''
-        },
-        {
-          name: 'Wookie',
-          classification: 'mammal',
-          designation: 'sentient',
-          average_height: '210',
+          skin_colors: 'caucasian, black, asian, hispanic',
+          hair_colors: 'blonde, brown, black, red',
+          eye_colors: 'brown, blue, green, hazel, grey, amber',
+          average_lifespan: '120',
           homeworld: 'https://swapi.dev/api/planets/1/',
-          language: 'Shyriiwook',
-          skin_colors: '',
-          hair_colors: '',
-          eye_colors: '',
-          average_lifespan: '',
-          people: [],
-          films: [],
-          created: '',
-          edited: '',
-          url: ''
-        },
-        {
-          name: 'Ewok',
-          classification: 'mammal',
-          designation: 'sentient',
-          average_height: '100',
-          homeworld: null,
-          language: 'Ewokese',
-          skin_colors: '',
-          hair_colors: '',
-          eye_colors: '',
-          average_lifespan: '',
+          language: 'Galactic Basic',
           people: [],
           films: [],
           created: '',
@@ -363,14 +329,54 @@ describe('SpeciesService', () => {
 
       expect(mockSwapiAdapter.getAllSpecies).toHaveBeenCalled();
       expect(mockSwapiAdapter.getPlanet).toHaveBeenCalledWith('1');
-
-      expect(result).toHaveLength(4);
+      expect(result).toHaveLength(2);
       expect(result[0].name).toBe('Human');
-      expect(result[1].name).toBe('Wookie');
-      expect(result[2].name).toBe('Ewok');
-      expect(result[3].name).toBe('Droid');
+      expect(result[0].homeworld).toEqual(expect.objectContaining({
+        name: 'Tatooine'
+      }));
+      expect(result[1].name).toBe('Droid');
+      expect(result[1].homeworld).toBeNull();
+    });
 
-      expect(result[1].homeworld).toEqual({
+    it('should sort species by average_height when sort parameter is provided', async () => {
+      const mockSpeciesData = [
+        {
+          name: 'Human',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '180',
+          skin_colors: 'caucasian, black, asian, hispanic',
+          hair_colors: 'blonde, brown, black, red',
+          eye_colors: 'brown, blue, green, hazel, grey, amber',
+          average_lifespan: '120',
+          homeworld: 'https://swapi.dev/api/planets/1/',
+          language: 'Galactic Basic',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        },
+        {
+          name: 'Wookie',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '210',
+          skin_colors: 'gray',
+          hair_colors: 'black, brown',
+          eye_colors: 'blue, green',
+          average_lifespan: '400',
+          homeworld: 'https://swapi.dev/api/planets/2/',
+          language: 'Shyriiwook',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        }
+      ];
+
+      const mockPlanet1 = {
         name: 'Tatooine',
         rotation_period: '23',
         orbital_period: '304',
@@ -384,8 +390,238 @@ describe('SpeciesService', () => {
         films: [],
         created: '',
         edited: '',
-        url: '',
+        url: ''
+      };
+
+      const mockPlanet2 = {
+        name: 'Kashyyyk',
+        rotation_period: '26',
+        orbital_period: '381',
+        diameter: '12765',
+        climate: 'tropical',
+        gravity: '1 standard',
+        terrain: 'jungle, forests, lakes, rivers',
+        surface_water: '60',
+        population: '45000000',
+        residents: [],
+        films: [],
+        created: '',
+        edited: '',
+        url: ''
+      };
+
+      mockSwapiAdapter.getAllSpecies.mockResolvedValue(mockSpeciesData);
+      mockSwapiAdapter.getPlanet.mockImplementation((id) => {
+        if (id === '1') return Promise.resolve(mockPlanet1);
+        if (id === '2') return Promise.resolve(mockPlanet2);
+        return Promise.reject(new Error('Planet not found'));
       });
+
+      const resultAsc = await speciesService.getAllSpecies('average_height', 'asc');
+      expect(resultAsc[0].name).toBe('Human');
+      expect(resultAsc[1].name).toBe('Wookie');
+
+      const resultAscDefault = await speciesService.getAllSpecies('average_height');
+      expect(resultAscDefault[0].name).toBe('Human');
+      expect(resultAscDefault[1].name).toBe('Wookie');
+
+      const resultDesc = await speciesService.getAllSpecies('average_height', 'desc');
+      expect(resultDesc[0].name).toBe('Wookie');
+      expect(resultDesc[1].name).toBe('Human');
+    });
+  });
+
+  describe('sortSpeciesByAverageHeight', () => {
+    it('should sort species by average height in ascending order', () => {
+      const mockSpecies = [
+        {
+          name: 'Human',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '180',
+          skin_colors: 'caucasian, black, asian, hispanic',
+          hair_colors: 'blonde, brown, black, red',
+          eye_colors: 'brown, blue, green, hazel, grey, amber',
+          average_lifespan: '120',
+          homeworld: null,
+          language: 'Galactic Basic',
+          people: ['https://swapi.dev/api/people/1/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T13:52:11.567000Z',
+          edited: '2014-12-20T21:36:42.136000Z',
+          url: 'https://swapi.dev/api/species/1/'
+        },
+        {
+          name: 'Wookie',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '210',
+          skin_colors: 'gray',
+          hair_colors: 'black, brown',
+          eye_colors: 'blue, green',
+          average_lifespan: '400',
+          homeworld: null,
+          language: 'Shyriiwook',
+          people: ['https://swapi.dev/api/people/13/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T16:44:31.486000Z',
+          edited: '2014-12-20T21:36:42.142000Z',
+          url: 'https://swapi.dev/api/species/3/'
+        },
+        {
+          name: 'Ewok',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '100',
+          skin_colors: 'brown',
+          hair_colors: 'white, brown, black',
+          eye_colors: 'orange, brown',
+          average_lifespan: 'unknown',
+          homeworld: null,
+          language: 'Ewokese',
+          people: [],
+          films: ['https://swapi.dev/api/films/3/'],
+          created: '2014-12-18T11:22:00.285000Z',
+          edited: '2014-12-20T21:36:42.155000Z',
+          url: 'https://swapi.dev/api/species/9/'
+        }
+      ];
+
+      const result = speciesService.sortSpeciesByAverageHeight(mockSpecies, 'asc');
+
+      expect(result[0].name).toBe('Ewok');
+      expect(result[1].name).toBe('Human');
+      expect(result[2].name).toBe('Wookie');
+    });
+
+    it('should sort species by average height in descending order', () => {
+      const mockSpecies = [
+        {
+          name: 'Human',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '180',
+          skin_colors: 'caucasian, black, asian, hispanic',
+          hair_colors: 'blonde, brown, black, red',
+          eye_colors: 'brown, blue, green, hazel, grey, amber',
+          average_lifespan: '120',
+          homeworld: null,
+          language: 'Galactic Basic',
+          people: ['https://swapi.dev/api/people/1/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T13:52:11.567000Z',
+          edited: '2014-12-20T21:36:42.136000Z',
+          url: 'https://swapi.dev/api/species/1/'
+        },
+        {
+          name: 'Wookie',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '210',
+          skin_colors: 'gray',
+          hair_colors: 'black, brown',
+          eye_colors: 'blue, green',
+          average_lifespan: '400',
+          homeworld: null,
+          language: 'Shyriiwook',
+          people: ['https://swapi.dev/api/people/13/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T16:44:31.486000Z',
+          edited: '2014-12-20T21:36:42.142000Z',
+          url: 'https://swapi.dev/api/species/3/'
+        },
+        {
+          name: 'Ewok',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '100',
+          skin_colors: 'brown',
+          hair_colors: 'white, brown, black',
+          eye_colors: 'orange, brown',
+          average_lifespan: 'unknown',
+          homeworld: null,
+          language: 'Ewokese',
+          people: [],
+          films: ['https://swapi.dev/api/films/3/'],
+          created: '2014-12-18T11:22:00.285000Z',
+          edited: '2014-12-20T21:36:42.155000Z',
+          url: 'https://swapi.dev/api/species/9/'
+        }
+      ];
+
+      const result = speciesService.sortSpeciesByAverageHeight(mockSpecies, 'desc');
+
+      expect(result[0].name).toBe('Wookie');
+      expect(result[1].name).toBe('Human');
+      expect(result[2].name).toBe('Ewok');
+    });
+
+    it('should handle non-numeric height values by placing them at the end of the sort regardless of sort order', () => {
+      const mockSpecies = [
+        {
+          name: 'Human',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '180',
+          skin_colors: 'caucasian, black, asian, hispanic',
+          hair_colors: 'blonde, brown, black, red',
+          eye_colors: 'brown, blue, green, hazel, grey, amber',
+          average_lifespan: '120',
+          homeworld: null,
+          language: 'Galactic Basic',
+          people: ['https://swapi.dev/api/people/1/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T13:52:11.567000Z',
+          edited: '2014-12-20T21:36:42.136000Z',
+          url: 'https://swapi.dev/api/species/1/'
+        },
+        {
+          name: 'Droid',
+          classification: 'artificial',
+          designation: 'sentient',
+          average_height: 'n/a',
+          skin_colors: 'n/a',
+          hair_colors: 'n/a',
+          eye_colors: 'n/a',
+          average_lifespan: 'indefinite',
+          homeworld: null,
+          language: 'n/a',
+          people: ['https://swapi.dev/api/people/2/'],
+          films: ['https://swapi.dev/api/films/1/'],
+          created: '2014-12-10T15:16:16.259000Z',
+          edited: '2014-12-20T21:36:42.139000Z',
+          url: 'https://swapi.dev/api/species/2/'
+        },
+        {
+          name: 'Ewok',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '100',
+          skin_colors: 'brown',
+          hair_colors: 'white, brown, black',
+          eye_colors: 'orange, brown',
+          average_lifespan: 'unknown',
+          homeworld: null,
+          language: 'Ewokese',
+          people: [],
+          films: ['https://swapi.dev/api/films/3/'],
+          created: '2014-12-18T11:22:00.285000Z',
+          edited: '2014-12-20T21:36:42.155000Z',
+          url: 'https://swapi.dev/api/species/9/'
+        }
+      ];
+
+      const resultDesc = speciesService.sortSpeciesByAverageHeight(mockSpecies, 'desc');
+
+      expect(resultDesc[0].name).toBe('Human');
+      expect(resultDesc[1].name).toBe('Ewok');
+      expect(resultDesc[2].name).toBe('Droid');
+
+      const resultAsc = speciesService.sortSpeciesByAverageHeight(mockSpecies, 'asc');
+
+      expect(resultAsc[0].name).toBe('Ewok');
+      expect(resultAsc[1].name).toBe('Human');
+      expect(resultAsc[2].name).toBe('Droid');
     });
   });
 });
