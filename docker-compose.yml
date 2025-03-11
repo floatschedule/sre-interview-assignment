@@ -1,7 +1,17 @@
 version: '3'
 
 services:
-  # Any other services here
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=swapi
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=swapi
+    restart: always
 
   api:
     build:
@@ -15,5 +25,11 @@ services:
       - .:/home/node/app
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgres://swapi:password@postgres:5432/swapi
     restart: always
     command: npm run start:dev
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

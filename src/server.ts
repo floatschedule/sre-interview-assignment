@@ -2,6 +2,7 @@ import config from 'config';
 import { fastify as Fastify, FastifyInstance } from 'fastify';
 
 import api from './api';
+import { initDatabase, closeConnection } from './db/connection';
 
 const INTERFACE: string = config.get('http.interface');
 const PORT: number = config.get('http.port');
@@ -18,7 +19,8 @@ export const build = () => {
   });
 
   server.addHook('onClose', async () => {
-    // Handle any shutdown events
+    // Close the database connection when the server shuts down
+    await closeConnection();
   });
 
   // Register the API scaffolding plugin.
@@ -29,6 +31,9 @@ export const build = () => {
 
 export const start = async (server: FastifyInstance): Promise<FastifyInstance> => {
   try {
+    // Initialize the database
+    await initDatabase();
+
     await server.listen({ port: PORT, host: INTERFACE });
   } catch (err) {
     if (err) {
