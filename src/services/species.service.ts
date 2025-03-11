@@ -1,7 +1,8 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
-import { Species, PaginatedResponse } from '../types/entities.types';
+import { Species, Planet, PaginatedResponse } from '../types/entities.types';
 import { mapToPlanet } from './mappers/mapToPlanet';
 import { mapToSpecies } from './mappers/mapToSpecies';
+
 export class SpeciesService {
   private swapiAdapter: SwapiAdapter;
 
@@ -47,6 +48,28 @@ export class SpeciesService {
       results: enhancedSpecies
     };
   }
+
+   async getAllSpecies(): Promise<Species[]> {
+    const allSpeciesData = await this.swapiAdapter.getAllSpecies();
+
+    const enhancedSpecies = await Promise.all(
+      allSpeciesData.map(async (speciesData) => {
+        if (!speciesData.homeworld) {
+          return mapToSpecies(speciesData, null);
+        }
+
+        const planetId = this.extractIdFromUrl(speciesData.homeworld);
+        const planetData = await this.swapiAdapter.getPlanet(planetId);
+        const planet = mapToPlanet(planetData);
+
+        return mapToSpecies(speciesData, planet);
+      })
+    );
+
+    return enhancedSpecies;
+  }
+
+
   private extractIdFromUrl(url: string): string {
     // Remove trailing slash if present
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;

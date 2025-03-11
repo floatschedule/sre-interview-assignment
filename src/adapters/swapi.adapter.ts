@@ -33,6 +33,22 @@ export class SwapiAdapter {
     return await response.json() as SwapiPaginatedResponse<SwapiSpecies>;
   }
 
+  async getAllSpecies(): Promise<SwapiSpecies[]> {
+    let allSpecies: SwapiSpecies[] = [];
+    let currentPage = 1;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      const response = await this.getSpeciesPage(currentPage);
+      allSpecies = [...allSpecies, ...response.results];
+
+      hasNextPage = !!response.next;
+      currentPage++;
+    }
+
+    return allSpecies;
+  }
+
   async getPlanet(id: string): Promise<SwapiPlanet> {
     const response = await fetch(`${this.baseUrl}/planets/${id}`);
 

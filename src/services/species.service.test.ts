@@ -265,4 +265,127 @@ describe('SpeciesService', () => {
       });
     });
   });
+
+  describe('getAllSpecies', () => {
+    it('should return all species', async () => {
+      const mockSpeciesData = [
+        {
+          name: 'Human',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '180',
+          homeworld: null,
+          language: 'Galactic Basic',
+          skin_colors: '',
+          hair_colors: '',
+          eye_colors: '',
+          average_lifespan: '',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        },
+        {
+          name: 'Wookie',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '210',
+          homeworld: 'https://swapi.dev/api/planets/1/',
+          language: 'Shyriiwook',
+          skin_colors: '',
+          hair_colors: '',
+          eye_colors: '',
+          average_lifespan: '',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        },
+        {
+          name: 'Ewok',
+          classification: 'mammal',
+          designation: 'sentient',
+          average_height: '100',
+          homeworld: null,
+          language: 'Ewokese',
+          skin_colors: '',
+          hair_colors: '',
+          eye_colors: '',
+          average_lifespan: '',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        },
+        {
+          name: 'Droid',
+          classification: 'artificial',
+          designation: 'sentient',
+          average_height: 'n/a',
+          homeworld: null,
+          language: 'n/a',
+          skin_colors: '',
+          hair_colors: '',
+          eye_colors: '',
+          average_lifespan: '',
+          people: [],
+          films: [],
+          created: '',
+          edited: '',
+          url: ''
+        }
+      ];
+
+      const mockPlanet = {
+        name: 'Tatooine',
+        rotation_period: '23',
+        orbital_period: '304',
+        diameter: '10465',
+        climate: 'arid',
+        gravity: '1 standard',
+        terrain: 'desert',
+        surface_water: '1',
+        population: '200000',
+        residents: [],
+        films: [],
+        created: '',
+        edited: '',
+        url: ''
+      };
+
+      mockSwapiAdapter.getAllSpecies.mockResolvedValue(mockSpeciesData);
+      mockSwapiAdapter.getPlanet.mockResolvedValue(mockPlanet);
+
+      const result = await speciesService.getAllSpecies();
+
+      expect(mockSwapiAdapter.getAllSpecies).toHaveBeenCalled();
+      expect(mockSwapiAdapter.getPlanet).toHaveBeenCalledWith('1');
+
+      expect(result).toHaveLength(4);
+      expect(result[0].name).toBe('Human');
+      expect(result[1].name).toBe('Wookie');
+      expect(result[2].name).toBe('Ewok');
+      expect(result[3].name).toBe('Droid');
+
+      expect(result[1].homeworld).toEqual({
+        name: 'Tatooine',
+        rotation_period: '23',
+        orbital_period: '304',
+        diameter: '10465',
+        climate: 'arid',
+        gravity: '1 standard',
+        terrain: 'desert',
+        surface_water: '1',
+        population: '200000',
+        residents: [],
+        films: [],
+        created: '',
+        edited: '',
+        url: '',
+      });
+    });
+  });
 });
