@@ -20,7 +20,7 @@ export class SwapiAdapter {
     return await response.json() as SwapiSpecies;
   }
 
-  async getSpeciesPage(page: number = 1): Promise<SwapiPaginatedResponse<SwapiSpecies>> {
+  private async getSpeciesPage(page: number = 1): Promise<SwapiPaginatedResponse<SwapiSpecies>> {
     const response = await fetch(`${this.baseUrl}/species/?page=${page}`);
 
     if (!response.ok) {
