@@ -1,13 +1,15 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
 import { Species, PaginatedResponse } from '../types/entities.types';
-import { mapToPlanet } from './mappers/mapToPlanet';
 import { mapToSpecies } from './mappers/mapToSpecies';
+import { PlanetService } from './planet.service';
 
 export class SpeciesService {
   private swapiAdapter: SwapiAdapter;
+  private planetService: PlanetService;
 
-  constructor(swapiAdapter: SwapiAdapter) {
+  constructor(swapiAdapter: SwapiAdapter, planetService: PlanetService) {
     this.swapiAdapter = swapiAdapter;
+    this.planetService = planetService;
   }
 
   async getSpeciesById(id: string): Promise<Species> {
@@ -18,8 +20,7 @@ export class SpeciesService {
     }
 
     const planetId = this.extractIdFromUrl(speciesData.homeworld);
-    const planetSwapiData = await this.swapiAdapter.getPlanet(planetId);
-    const planetData = mapToPlanet(planetSwapiData);
+    const planetData = await this.planetService.getPlanetById(planetId);
 
     return mapToSpecies(speciesData, planetData);
   }
@@ -34,10 +35,9 @@ export class SpeciesService {
         }
 
         const planetId = this.extractIdFromUrl(speciesData.homeworld);
-        const planetData = await this.swapiAdapter.getPlanet(planetId);
-        const planet = mapToPlanet(planetData);
+        const planetData = await this.planetService.getPlanetById(planetId);
 
-        return mapToSpecies(speciesData, planet);
+        return mapToSpecies(speciesData, planetData);
       })
     );
 

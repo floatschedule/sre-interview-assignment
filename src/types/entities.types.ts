@@ -8,6 +8,7 @@ export interface Planet {
   terrain: string;
   surface_water: string;
   population: string;
+  destroyed: boolean;
   residents: string[]; // URLs
   films: string[]; // URLs
   created: string;
