@@ -1,8 +1,6 @@
-// src/adapters/swapi.adapter.test.ts
 import { SwapiAdapter } from './swapi.adapter';
 import { SwapiSpecies, SwapiPlanet, SwapiPaginatedResponse } from '../types/swapi.types';
 
-// Mock global fetch
 global.fetch = jest.fn();
 
 describe('SwapiAdapter', () => {
@@ -183,7 +181,6 @@ describe('SwapiAdapter', () => {
     });
 
     it('should handle errors during fetching all species', async () => {
-      // Mock a server error
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
