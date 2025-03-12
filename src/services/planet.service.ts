@@ -1,6 +1,6 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
 import { Planet } from '../types/entities.types';
-import { mapToPlanet } from './mappers/mapToPlanet';
+import { mapToPlanet } from './service-mappers/mapToPlanet';
 import { PlanetRepository } from '../repositories/planet.repository';
 
 export class PlanetService {

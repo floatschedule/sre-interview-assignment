@@ -1,6 +1,6 @@
 import { SwapiAdapter } from '../adapters/swapi.adapter';
-import { Species, PaginatedResponse } from '../types/entities.types';
-import { mapToSpecies } from './mappers/mapToSpecies';
+import { Species } from '../types/entities.types';
+import { mapToSpecies } from './service-mappers/mapToSpecies';
 import { PlanetService } from './planet.service';
 
 export class SpeciesService {
