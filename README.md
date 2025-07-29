@@ -21,6 +21,7 @@ Can you build a CI pipeline for the application which the devs can then re-use f
 - If the tests fail the application shouldn't build a new release image.
 - If the tests pass the application should build a new release image, but only if this is a merge to the master branch.
 - Tests should run against all branches.
+- If you run short of time please take time to write down what else you would have liked to have done. 
 
 ## Evaluation Criteria
 
@@ -40,6 +41,6 @@ The following items are considered out of scope for this test:
 
 ## Submission
 
-When you have completed the assignment, please submit your solution by ????? Include any necessary instructions or documentation for running and testing your solution.
+When you have completed the assignment, please include any necessary instructions or documentation for running and testing your solution.
 
 Feel free to reach out if you have any questions or need any clarifications. Good luck!
