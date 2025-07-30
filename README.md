@@ -17,18 +17,20 @@ Can you build a CI pipeline for the application which the devs can then re-use f
 
 ## Basic Requirements
 
-- The application should run tests before building.
-- If the tests fail the application shouldn't build a new release image.
-- If the tests pass the application should build a new release image, but only if this is a merge to the master branch.
+- If the tests pass the application should build a new release image.
 - Tests should run against all branches.
-- If you run short of time please take time to write down what else you would have liked to have done. 
+- If you run short of time please take time to write down what else you would have liked to have done.
+
+## Image Registry
+
+ttl.sh is a free registry which we'd advise to use in this assignment with a low TTL (1m): https://ttl.sh
 
 ## Evaluation Criteria
 
 Your solution will be evaluated based on the following criteria:
 
 - **Usability:** Adding PR comments for failing tests, considering integrating notification events or other useability actions that could support our development teams in making them more efficient.
-- **Security Best Practices:** Follow general security best practices. Use your best judgement to determine what the boundaries should be, don't store confidential information publicly accessible.
+- **Security Best Practices:** Follow general security best practices. Use your best judgement to determine what the boundaries should be.
 - **Scalability and Robustness:** Design your solution to be scalable and robust, considering factors like performance, error handling, and scalability.
 - **Maintainability of Code:** Write clean, modular, and maintainable configuration with appropriate documentation and comments.
 - **Git Commit Best Practices:** Contribute to the repository using Git commit best practices, making logical and granular commits.
